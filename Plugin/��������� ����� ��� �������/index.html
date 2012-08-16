@@ -1,0 +1,117 @@
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Оффлайн генератор тега</title>
+	<script type="text/javascript" src="jquery-1.7.2.min.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function(){
+			$('#gen_btn').click(function(){
+				var code = '';
+				code += '{include file="engine/modules/sotmarket/sotmarket.php?';
+				code += 'type='+$('#sotmarket-type').val();
+				code += '&';
+				code += 'product_id='+$('#sotmarket-product-id').val();
+				code += '&';
+				code += 'product_name='+$('#sotmarket-product-name').val();
+				code += '&';
+				code += 'cnt='+$('#sotmarket-cnt').val();
+				code += '&';
+				code += 'image_size='+$('#sotmarket-image-size').val();
+				code += '&';
+				code += 'template='+$('#sotmarket-template').val();
+				code += '&';
+				code += 'fullstory='+$('#sotmarket-fullstory').val();
+				code += '&';
+				code += 'categories='+$('#sotmarket-cats').val();
+				//code += '&';
+
+				code += '"}';
+				alert('Полученный тег: \r\n '+code);
+				return false;
+			});
+		});
+
+	</script>
+<style type="text/css">
+.desc {
+	color: #333;
+	font: 12px Arial, Helvetica, sans-serif;
+	margin: -12px 0 10px 0;
+}
+.desc2 {
+	font-size: 12px;
+}
+</style>
+</head>
+<body>
+<div style="width: 600px; margin: 0 auto; font-family: Arial, Helvetica, sans-serif; font-size:14px">
+
+<div id="sotmarket_dialog" title="Генерация тега Сотмаркет" >
+    <h1 style="font-size: 24px">Генерация тега для вставки в шаблоны</h1>
+    Вам нужно лишь сделать необходимые настройки, и полученный в результате тег, вставить в шаблон на сайте.
+    <p>
+      <label><strong>Тип тега:</strong></label>
+    <div class="desc">Выбираем какой типа инфоблока мы хотим получить</div>
+<select id="sotmarket-type">
+          <option value="products" selected>Товары</option>
+          <option value="related">Аксессуары</option>
+          <option value="analog">Похожие товары</option>
+    </select>
+    </p>
+    <p>
+        <label><strong>ID товара</strong> <span class="desc2">(товаров через запятую):</span></label>
+    <div class="desc">Вводим ID товаров, приоритет всегда выше в тегах, где указан ID продукта</div>
+        <input type="text" id="sotmarket-product-id" value="" />
+    </p>
+    <p>
+        <label><strong>Название товара:</strong></label>
+        <div class="desc">Пишем название товара или бренда, если указаны ID, то данное значение не сработает, так как ID более приоритетнее</div>
+        <input type="text" id="sotmarket-product-name" value="" />
+    </p>
+    <p>
+        <label><strong>Сколько товаров выводить:</strong></label>
+        <div class="desc">Указываем число продуктов, не рекомендуется выводить более 10 продуктов</div>
+        <input type="text" id="sotmarket-cnt" value="1" />
+    </p>
+    <p>
+        <label><strong>Размер картинки:</strong></label><br/>
+        <select id="sotmarket-image-size">
+            <option value="default" >стандартные</option>
+            <option value="100x100">100x100</option>
+            <option value="140x200">140x200</option>
+            <option value="1200x1200">1200x1200</option>
+            <option value="100x150">100x150</option>
+            <option value="50x50">50x50</option>
+        </select>
+    </p>
+    <p>
+        <label><strong>Шаблон:</strong></label>
+        <div class="desc">Выбираем какой из шаблонов использовать.</div>
+		<select id="sotmarket-template">
+			<option value="sotmarket_block" >sotmarket_block</option>
+			<option value="sotmarket_2column" >sotmarket_2column</option>
+			<option value="sotmarket_3column" >sotmarket_3column</option>
+			<option value="sotmarket_5column" >sotmarket_5column</option>
+			<option value="sotmarket_product_link" >sotmarket_product_link</option>
+		</select>
+    </p>
+	<p>
+        <label><strong>id категорий:</strong></label>
+        <div class="desc">Указываем ID категории из которой будет происходить выбора товаров. Данный параметр актуален только для выбора категории сопутствующих товаров. В остальных случаях указание категории - не обязательно.</div>
+        <input type="text" id="sotmarket-cats" value="" />
+    </p>
+    <p>
+        <label><strong>Брать id или имя из дополнительного поля:</strong></label>
+        <div class="desc">Если мы укажем "Да", то на страницах имеющих в дополнительных полях ID продуктов будет выводить инфоблок, привязанный к данному продукту и настройки ID указанные выше, будут игнорироваться. Если укажем "Нет", то в инфоблоке всегда будут выводиться продукты, ID которых указаны в теге.</div>
+        <select id="sotmarket-fullstory">
+            <option value="off" >Нет</option>
+            <option value="on">Да</option>
+        </select>
+    </p>
+	<p>
+		<a id="gen_btn" href="#">Сгенерировать тег</a>
+	</p>
+    * После генерации тега, полученный сгенерированный тег вставьте в нужное место своего шаблона.
+</div>
+
+</div>
+</body>
