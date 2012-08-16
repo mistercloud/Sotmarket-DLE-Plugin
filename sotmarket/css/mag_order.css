@@ -1,0 +1,105 @@
+#sm_order span {
+    display: inline-block;
+    float:left;
+    margin: -2px 0 0 0;
+}
+.checkout_left { float:left; margin: 5px 0 -4px 0;}
+.checkout_right { float:right; width:80px; text-align:right; margin: 6px 0 0 0; }
+#sm_order span.quantity {
+    float: none;
+    font: 10px/17px "Arial";
+    letter-spacing: 1px;
+    padding: 4px 2px 0 0;
+    width: 40px;
+    float:left;
+}
+#sm_order span.quantity span{
+    display: inline-block;
+    font-size: 10px;
+    text-align: right;
+    width: 20px;
+    margin: 0;
+}
+#sm_order #total span { margin: 5px 0 0 0; text-align:right;}
+#sm_order #total span.price{ margin: 5px 0 0 15px; text-align:left;}
+#sm_order #total span strong{ margin: 0 0 0 35px; width: 200px; text-align:left;}
+.total_cart {border-top: 1px dashed #333; width:213px; float:right; margin: 0 10px 0 0}
+#sm_order span.price, #sm_order span.row_total {
+    float:right;
+    float:left;
+}
+#contacts, #address, #delivery { margin: 10px 0 0 0}
+#contacts span{ width: 70px; display: inline-block; margin: 0 0 0 10px}
+#address span{ width: 110px; display: inline-block; margin: 0 0 0 10px}
+#sm_order #contacts input[type="text"] { width: 250px;}
+#sm_order #address select { width: 213px;}
+#sm_order #delivery span { float:none;}
+#sm_order span.remove {
+    width: 20px;
+    cursor: pointer;
+    float: right;
+    margin: -2px 0 3px;
+}
+#sm_order input {
+    margin: 2px 0px 10px 0px;
+}
+#sm_order input[type="text"] {
+    width: 200px;
+    font-size: 14px;
+}
+#sm_order input[type="radio"] {
+    margin: 1px 4px 0 0;
+    float:left;
+    display: inline-block;
+}
+#sm_order input.cnt {
+    width: 30px;
+}
+
+#sm_order textarea {
+    width: 300px;
+    height: 60px;
+}
+
+#sm_order div.deliver {
+    padding: 0px 10px 0px 10px;
+    min-height:20px;
+}
+
+#sm_order div.payment {
+    padding: 5px 10px 5px 20px;
+    line-height: 22px;
+}
+
+.hide {
+    display: none;
+}
+
+.show {
+    display: block;
+}
+
+span#phone {
+    position: relative;
+}
+
+span#phone span {
+    position: absolute;
+    font-size: 14px;
+    width: 17px;
+    top: 4px;
+    left: 4px;
+}
+
+a.productcart {
+    padding: 0 0 4 0;
+    width: 300px;
+    margin-right: 7px;
+    display: inline-block;
+    overflow-x: hidden;
+    white-space: nowrap;
+}
+
+input.cnt {
+    width: 20px
+}

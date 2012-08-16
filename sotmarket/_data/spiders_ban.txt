@@ -1,0 +1,145 @@
+teoma
+turnitinbot
+ultraseek
+vagabondo
+voilabot
+w3c_validator
+zao/0
+zyborg/1.0
+twiceler
+clx.ru
+yetibot@naver.com
+picsearch.com
+sitesell.com
+sape.bot
+majestic12.co.uk
+seolinbot
+speedy spider
+download master
+emailsearch
+vadixbot
+wortschatz.uni-leipzig.de
+gigablast.com
+linkru
+yama.info
+alllinks.ru
+seventwentyfour
+sidewinder
+sleek spider
+slurp/si
+slurp@inktomi.com
+steeler/1.3
+szukacz
+t-h-u-n-d-e-r-s-t-o-n-e
+mantraagent
+mercator
+moget/1.0
+muscatferret
+nationaldirectory-webspider
+naverrobot
+ncsa beta
+netresearchserver
+osis-project
+polybot
+pompos
+scooter
+eStyleSearch
+infoseek
+kit_fireball
+lachesis
+gulliver
+henrythemiragorobot
+ia_archiver
+almaden.ibm.com
+appie 1.1
+architext
+inktomi
+ask jeeves
+asterias2.0
+augurfind
+baiduspider
+bannana_bot
+bdcindexer
+crawler
+crawler@fast
+docomo
+fast-webcrawler
+fluffy the spider
+frooglebot
+ibm
+link.ru
+flexum spider
+wcat.biz
+linkexchanger
+dataparksearch.org
+esyndicat bot
+centrum.cz
+mofers.nl
+bot.bot
+lermont.ru
+search.msn.com
+yadirectbot
+internetseer.com
+sogou.com
+linkwalker
+www.globalspec.com
+surveybot
+sapienti
+pete-spider light
+webcopier v4
+mlinks
+mehyjisvrwmnp
+dead-links.com
+kompass websearch robot
+web downloader
+teleport pro
+norbert the spider
+nextgensearchbot
+www.snap.com
+www.bilgi.com
+st7bot
+webcopier session
+yahoo
+tnx
+setlinks bot 1.0
+linkfeed bot
+htmlparser/1.6
+twenga.com
+igdespyder
+panscient.com
+ispider
+a1 website download
+promotext bot
+pilesosik libwww
+wget/1.11
+promotext bot
+pilesosik libwww-perl
+a1 website download
+kalooga/kalooga
+rulinki.ru project
+x11; i; linux 2.6.22-gentoo-r8 x86_64
+flexum
+eurobot
+mainLinksuperbot
+yanga.co.uk
+flickysearchbot
+spider bot
+gde.ru
+loopip.com
+all.by
+rdfbot
+sitemap.com.ua
+gais.cs.ccu.edu.tw
+bim-zone.com
+magus bot
+shelob@gmx.net
+xenu link sleuth
+# --- Добавил 24.05.2010 --- #
+rambler
+google
+yandex
+twiceler
+# --- Добавил 25.08.2010 --- #
+aportworm
+twengabot
+mj12bot
