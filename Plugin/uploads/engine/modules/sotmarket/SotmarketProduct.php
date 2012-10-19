@@ -50,8 +50,7 @@ class SotmarketProduct {
             echo 'Неверный тип запрашиваемых данных';
         }
 
-        $this->sLabel = $aConfig['SOTMARKET_FROM'];
-        $this->sLabelType = $aConfig['SOTMARKET_LABEL_TYPE'];
+        $this->sLabel = $aConfig['SOTMARKET_SUBREF'];
 
         if ($aConfig['SOTMARKET_LINK_TYPE'] == 'redirect'){
             $this->bExternalLink = false;
@@ -62,8 +61,23 @@ class SotmarketProduct {
 
     public function getProducts( $aProductsIds, $sProductName = '', $iCnt = 1,  $sTemplate = 'sotmarket_block' , $sImageSize = 'default', $aCategories = array()){
 
+
+        //если ищем популярные товары
+        $bIsPopular = false;
+        if (!$sProductName && !$aProductsIds && $this->sType == 'products'){
+            if (!$aCategories){
+                $aCategories = array(11,25);
+            }
+            $bIsPopular = true;
+            $aProductsIds = $this->oController->product_search( '' , $aCategories,array(),'popularity','asc' );
+        }
+
         if ( $sProductName && !$aProductsIds){
-            if ( $this->sType == 'products' && $aCategories){
+
+            if ( $this->sType == 'products'){
+                if (!$aCategories){
+                    $aCategories = array(11,25);
+                }
                 $aProductsIds = $this->oController->product_search_cached( $sProductName , $aCategories );
             } else {
                 $aProductsIds = $this->oController->product_search_cached( $sProductName , array(11,25) );
@@ -80,10 +94,10 @@ class SotmarketProduct {
         }
 
         if ( $this->sType == 'analog' ){
-            if (!$aCategories ){
+            $aAnalogIds = array();
+            if (!$aCategories){
                 $aCategories = array(11,25);
             }
-            $aAnalogIds = array();
             foreach( $aProductsIds as $iProductId ){
 
                 $aFindedAnalogProductIds = $this->oController->products_analog_cached( $iProductId, $aCategories,array());
@@ -103,7 +117,7 @@ class SotmarketProduct {
 
             $aRelatedIds = array();
             foreach( $aProductsIds as $iProductId ){
-                $aFindedRelatedProductIds = $this->oController->product_accessories_cached( $iProductId, $aCategories,array());
+                $aFindedRelatedProductIds = $this->oController->product_accessories( $iProductId, $aCategories,array());
 
                 $aRelatedIds  = array_merge( $aRelatedIds , $aFindedRelatedProductIds );
                 //если уже получили больше товаров чем в пределе
@@ -119,9 +133,24 @@ class SotmarketProduct {
 
 
         //находим информацию о товаре
-        $aProductsInfo = $this->oController->product_info_array_cached($aProductsIds, array('image_size' => $sImageSize), true);
+        if ($bIsPopular){
+            $aParams = array(
+                'image_size' => $sImageSize,
+                'order_by' => 'popularity' ,
+                'sort_by' => 'asc'
+            );
+        } else {
+            $aParams = array(
+                'image_size' => $sImageSize,
+
+            );
+        }
+
+        $aProductsInfo = $this->oController->product_info_array_cached($aProductsIds, $aParams, true);
+
 
         $aProducts = array();
+
         foreach( $aProductsInfo as $iProductId => $aProductInfo ){
 
             $sImgUrl = $aProductsInfo[$iProductId]['image_url'];
@@ -136,13 +165,15 @@ class SotmarketProduct {
             } else {
                 $sFullImgUrl = $this->sHomeUrl.$this->oImageCache->sGetImagePath($sLocalImgUrl);
 
+
             }
 
             $aProductInfo['name'] = iconv( 'cp1251','utf-8',$aProductInfo['name'] );
 
             $sProductUrl = $aProductInfo['info_url'] . '?ref=' . $this->iPartnerId;
+            $sProductUrl .= '&subref=plug_dle.site_'.$this->iSiteId.'.type_'.$this->sType.'.product_'.$iProductId;
             if ($this->sLabel){
-                $sProductUrl .= '&'.$this->sLabelType .'='.$this->sLabel;
+                $sProductUrl .= '.any_'.$this->sLabel;
             }
 
             if ( !$this->bExternalLink && $this->sBlockType == 'informer'){
@@ -173,6 +204,8 @@ class SotmarketProduct {
 
             );
         }
+
+
 
         $sReturn = $this->getRenderedData( $aProducts , $sTemplate);
 

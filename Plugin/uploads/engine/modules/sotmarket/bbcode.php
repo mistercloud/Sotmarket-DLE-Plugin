@@ -36,6 +36,8 @@ $sSotmarketBB = <<<HTML
                     code += 'fullstory='+$('#sotmarket-fullstory').val();
                     code += '&';
 				    code += 'categories='+$('#sotmarket-cats').val();
+				    code += '&';
+				    code += 'subref='+$('#sotmarket-subref').val();
                     //code += '&';
 
                     code += '"}';
@@ -124,6 +126,10 @@ $sSotmarketBB = <<<HTML
             <option value="off" >Нет</option>
             <option value="on">Да</option>
         </select>
+	</p>
+	<p>
+		<label>Значение subref:</label><br/>
+		<input type="text" id="sotmarket-subref" value="" />
 	</p>
 </div>
 

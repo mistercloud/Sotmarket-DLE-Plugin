@@ -22,7 +22,8 @@
 				code += 'fullstory='+$('#sotmarket-fullstory').val();
 				code += '&';
 				code += 'categories='+$('#sotmarket-cats').val();
-				//code += '&';
+				code += '&';
+				code += 'subref='+$('#sotmarket-subref').val();
 
 				code += '"}';
 				alert('Полученный тег: \r\n '+code);
@@ -107,6 +108,10 @@
             <option value="on">Да</option>
         </select>
     </p>
+	<p>
+		<label>Значение subref:</label><br/>
+		<input type="text" id="sotmarket-subref" value="" />
+	</p>
 	<p>
 		<a id="gen_btn" href="#">Сгенерировать тег</a>
 	</p>

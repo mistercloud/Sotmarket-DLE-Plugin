@@ -1,37 +1,23 @@
 <?php
 /**
- * @ver 0.3
- * @author Андрей Смирнов
+ * @ver    0.4
+ * @author пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
  **/
 
-class SotmarketClientCacheFile extends SotmarketClientCache
-{
-    // @var string $sTmPath
-    // путь к директории с временными файлами
-    public $sTmpPath = null;
-
-    public function __construct($config)
-    {
-        if (!empty($config['tmpPath'])) {
-            $this->sTmpPath = $config['tmpPath'];
-            parent::__construct($config);
-        }
-    }
-
+class SotmarketClientCacheFile extends SotmarketClientCache {
     /**
-     * @var string $sHash хэш кэша
-     * @var mixed $sResult переменная в которой возвращаются данные из кэша
-     * @var boolean $bDontTransform не сериализировать данные
-     * @return boolean true если удалось прочитать данные из кэша
+     * @var string  $sHash          пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
+     * @var mixed   $sResult        пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ
+     * @var boolean $bDontTransform пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
+     * @return boolean true пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ
      **/
-    public function bGetCache($sHash, &$sResult, $bDontTransform = false)
-    {
-        if (!$this->bCheckCache($sHash)){
+    public function bGetCache($sHash,&$sResult,$bDontTransform = false) {
+        if (!$this->bCheckCache($sHash)) {
             return false;
         }
-        $sFileName = $this->sTmpPath . $sHash;
-        $sContent = file_get_contents($sFileName);
-        if ($bDontTransform){
+        $sFileName = $this->sGetFileName($sHash);
+        $sContent  = file_get_contents($sFileName);
+        if ($bDontTransform) {
             $sResult = $sContent;
             return true;
         }
@@ -42,46 +28,54 @@ class SotmarketClientCacheFile extends SotmarketClientCache
         }
         return true;
     }
-    /**
-     *
-     **/
-     public function bCheckCache($sHash){
-        if (!isset($this->sTmpPath)) return false;
 
-        $sFileName = $this->sTmpPath . $sHash;
+    /**
+     * пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅ
+     * @param $sHash пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅ
+     * @return bool
+     */
+    public function bCheckCache($sHash) {
+        if (!isset($this->sLocalCacheDir)) return false;
+
+        $sFileName = $this->sGetFileName($sHash);
 
         if (!file_exists($sFileName)) {
             return false;
         }
+
         if (filemtime($sFileName) + $this->iExpireTime < time()) {
             return false;
         }
         return true;
-     }
-    /**
-     *
-     **/
-    public function vSaveRemote($sHash, $sRemoteUrl){
-        if (empty($sRemoteUrl)) return;
-        $this->vSaveCache($sHash, file_get_contents($sRemoteUrl), true);
     }
+
     /**
-     * @var string $sHash хэш кэша
-     * @var mixed $sData переменная в которой передаются данные
-     * @var boolean $bDontTransform не проводить сериализацию
+     * пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅ URL пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ
+     * @param $sHash      hash пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅ
+     * @param $sRemoteUrl пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
+     * @return void
+     */
+    public function vSaveRemote($sHash,$sRemoteUrl) {
+        if (empty($sRemoteUrl)) return;
+        $this->vSaveCache($sHash,file_get_contents($sRemoteUrl),true);
+    }
+
+    /**
+     * @var string  $sHash          пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
+     * @var mixed   $sData          пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
+     * @var boolean $bDontTransform пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+     * @throw Exception пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ
      **/
-    public function vSaveCache($sHash, $sData, $bDontTransform = false)
-    {
+    public function vSaveCache($sHash,$sData,$bDontTransform = false) {
         if (empty($sHash)) return;
-        if (!isset($this->sTmpPath)) return;
-        $sFileName = $this->sTmpPath . $sHash;
-        if ($bDontTransform){
-            $res = file_put_contents($sFileName, $sData);
-        }else{
-            $res = file_put_contents($sFileName, serialize($sData));
+        if (!isset($this->sLocalCacheDir)) return;
+        if (!$bDontTransform) {
+            $sData = serialize($sData);
         }
-        if ($res == false){
-            throw new InfoException('Not writable cache. Check config and rights on tmp dir.'.$sFileName);
+        $sFileName = $this->sGetFileName($sHash,true);
+        $res       = file_put_contents($sFileName,$sData);
+        if ($res == false) {
+            throw new InfoException('Not writable cache. Check config and rights on tmp dir. ' . $sFileName);
         }
     }
 }

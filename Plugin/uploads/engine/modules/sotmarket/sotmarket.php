@@ -1,7 +1,5 @@
 <?php
-/**
-* Версия 2.0.0
-*/
+
 if(!defined('DATALIFEENGINE')) die("Hacking attempt!");
 
 $aTypes = array('products','related','analog');
@@ -110,21 +108,28 @@ if ( isset( $fullstory) ){
     }
 }
 
-if (isset($from)){
-    $aConfig['SOTMARKET_LABEL_TYPE'] = 'from';
-    $aConfig['SOTMARKET_FROM'] = $from;
-}
 if (isset($subref)){
-    $aConfig['SOTMARKET_LABEL_TYPE'] = 'subref';
-    $aConfig['SOTMARKET_FROM'] = $subref;
+    $aConfig['SOTMARKET_SUBREF'] = $subref;
 }
-
 $oSotmarketProduct = new SotmarketProduct( $aConfig ,$tpl , $type );
 try {
 	$sReturn = $oSotmarketProduct->getProducts( $aProductIds, $sProductName, $iCnt , $sTemplate, $sImageSize, $aCategories );
 } catch (Exception $e) {
 	$sReturn = $e->getMessage();
 	$sReturn = iconv('cp1251','utf-8',$sReturn);
+}
+
+//проверка на доп поля в тексте
+if( strpos( $sReturn, "[xfvalue_" ) !== false && isset($_GET['newsid'])){
+
+    $iNewsId = $_GET['newsid'];
+    $sXFields = $db->super_query( "SELECT xfields FROM " . PREFIX . "_post WHERE id = ".$iNewsId );
+    $sXFields = $sXFields['xfields'];
+    $aXFields = xfieldsdataload($sXFields);
+    foreach($aXFields as $sFieldName => $sFieldValue){
+        $sReturn = str_replace( "[xfvalue_{$sFieldName}]", stripslashes( $sFieldValue ), $sReturn );
+    }
+
 }
 
 echo $sReturn;
