@@ -70,10 +70,10 @@ class SotmarketClientImageCacheFile extends SotmarketClientCacheFile {
     }
 
     function sGetImagePath($sPostfix) {
-        return '/' . $this->sTmpPath . $this->sGetRelativePath($sPostfix);
+        return $this->sTmpPath . $this->sGetRelativePath($sPostfix);
     }
 
     function sGetDefaultImagePath() {
-        return '/' . $this->sTmpPath . $this->sDefaultImagePath;
+        return $this->sTmpPath . $this->sDefaultImagePath;
     }
 }
