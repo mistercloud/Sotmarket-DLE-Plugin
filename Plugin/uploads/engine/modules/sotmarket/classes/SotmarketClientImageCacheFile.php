@@ -1,15 +1,13 @@
 <?php
 /**
- * @ver 0.4
- * @author Андрей Смирнов
+ * @ver    0.4
+ * @author пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
  **/
 
-class SotmarketClientImageCacheFile extends SotmarketClientCacheFile
-{
+class SotmarketClientImageCacheFile extends SotmarketClientCacheFile {
     private $sDefaultImagePath = '';
 
-    public function __construct($config)
-    {
+    public function __construct($config) {
         if (isset($config['defaultImgPath'])) {
             $this->sDefaultImagePath = $config['defaultImgPath'];
         } else {
@@ -19,10 +17,10 @@ class SotmarketClientImageCacheFile extends SotmarketClientCacheFile
     }
 
     /**
-     * @var string $sHash хэш кэша
-     * @var mixed $sResult переменная в которой возвращаются данные из кэша
-     * @var boolean $bDontTransform не сериализировать данные
-     * @return boolean true если удалось прочитать данные из кэша
+     * @var string  $sHash          пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
+     * @var mixed   $sResult        пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ
+     * @var boolean $bDontTransform пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
+     * @return boolean true пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ
      **/
 /*
     public function vOutputCache($sHash)
@@ -43,39 +41,39 @@ class SotmarketClientImageCacheFile extends SotmarketClientCacheFile
     }
 */
     /**
-     * Возвращает расширение с точкой
+     * пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
      **/
-    public static function sGetExtensionWithDot($sFileName)
-    {
+    public static function sGetExtensionWithDot($sFileName) {
         return strrchr($sFileName, '.');
     }
 
     /**
-     *
      * @return true if success
      **/
-    public function bSaveRemote($sHash, $sRemoteUrl)
-    {
+    public function bSaveRemote($sHash, $sRemoteUrl) {
         if (empty($sRemoteUrl)) return;
         $oCurl = curl_init();
         curl_setopt($oCurl, CURLOPT_URL, $sRemoteUrl);
-        curl_setopt($oCurl, CURLOPT_USERAGENT, 'sotmarket_dle_imagecache');
+        curl_setopt($oCurl, CURLOPT_USERAGENT, 'sotmarket_wp_imagecache');
         curl_setopt($oCurl, CURLOPT_HEADER, 0);
         curl_setopt($oCurl, CURLOPT_RETURNTRANSFER, TRUE);
+        curl_setopt($oCurl, CURLOPT_FOLLOWLOCATION, 1);
         curl_setopt($oCurl, CURLOPT_TIMEOUT, 4);
         $sContent = curl_exec($oCurl);
-        if (empty($sContent)) return false;
+
+        //пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+        if (empty($sContent)){
+            $sContent = file_get_contents($this->sGetDefaultImagePath());
+        }
         $this->vSaveCache($sHash, $sContent, true);
         return true;
     }
 
-    function sGetImagePath($sPostfix)
-    {
-        return '/' . $this->sTmpPath . $sPostfix;
+    function sGetImagePath($sPostfix) {
+        return '/' . $this->sTmpPath . $this->sGetRelativePath($sPostfix);
     }
 
-    function sGetDefaultImagePath()
-    {
+    function sGetDefaultImagePath() {
         return '/' . $this->sTmpPath . $this->sDefaultImagePath;
     }
 }

@@ -1,15 +1,17 @@
 <?php
- /**
- * Клиент работающий с RPC сервером
+/**
+ * РљР»РёРµРЅС‚ СЂР°Р±РѕС‚Р°СЋС‰РёР№ СЃ RPC СЃРµСЂРІРµСЂРѕРј
  *
  * @copyright   Copyright (c) 2011, SOTMARKET.RU
- * @version     0.2.1  8.04.2011
- * @author      Ковылин Владимир ( k-v-n@inbox.ru )
- * @author      Андрей Смирнов () переработка
+ * @version     0.4.1  20.06.2011
+ * @author      РљРѕРІС‹Р»РёРЅ Р’Р»Р°РґРёРјРёСЂ ( k-v-n@inbox.ru )
+ * @author      РђРЅРґСЂРµР№ РЎРјРёСЂРЅРѕРІ () РїРµСЂРµСЂР°Р±РѕС‚РєР°
+
+Р”РѕР±Р°РІР»РµРЅР° РІРѕР·РјРѕР¶РЅРѕСЃС‚СЊ РїРµСЂРµРєРѕРґРёСЂРѕРІР°РЅРёСЏ РёР· СЃРµСЂРІРµСЂРЅРѕР№ РєРѕРґРёСЂРѕРІРєРё cp1251 РІ РґСЂСѓРіРёРµ РЅРµРѕР±С…РѕРґРёРјС‹Рµ РєРѕРґРёСЂРѕРІРєРё (РќР°РїСЂРёРјРµСЂ:utf-8)
+ *
  **/
 
-class SotmarketRPCClient
-{
+class SotmarketRPCClient {
     protected $_config;
     private $mIPs = array();
     private $mUserAgents = array();
@@ -19,24 +21,38 @@ class SotmarketRPCClient
 
     private $_objectsByClassName = array();
     private $_aTasks = array();
+
     // @var SotmarketClientCache
     private $_oCache = null;
     CONST UPDATE_SERVER_FILES = 'http://files.sotmarket.ru/forum/';
+
     /**
-     * @param array $config
+     * @param array|SotmarketConfig      $config
      * @param SotmarketRPCClientCallback $callback
      */
-    function __construct(array $config, SotmarketRPCClientCallback $callback)
-    {
-        $this->_config = $config;
-        $this->_callback = $callback;
-        $this->_oCache = new SotmarketClientCacheFile($this->_config);
+    function __construct($config,SotmarketRPCClientCallback $callback) {
+        if (is_array($config)) {
+            $this->_config = $config;
+        } else {
+            //SotmarketConfig
+            $this->_config = $config->config;
+        }
+        $this->_callback            = $callback;
+        $this->_config['cacheType'] = 'file';
+        $this->_oCache              = SotmarketClientCache::getInstance($this->_config);
+
+        $this->sClientEncoding = isset($this->_config['encoding']) ? $this->_config['encoding'] : 'cp1251';
+        $this->sServerEncoding = 'cp1251';
+
+        if ($this->sServerEncoding != $this->sServerEncoding && !extension_loaded('iconv')) {
+            throw new SotmarketException('РџРµСЂРµРєРѕРґРёСЂРѕРІРєР° С‚РµРєСЃС‚Р° РЅРµРІРѕР·РјРѕР¶РЅР° Р±РµР· СѓСЃС‚Р°РЅРѕРІР»РµРЅРЅРѕРіРѕ РґРѕРїРѕР»РЅРµРЅРёСЏ iconv');
+        }
     }
+
     /**
      * @param $className
      **/
-    function getObjectByClassName($className)
-    {
+    function getObjectByClassName($className) {
 
         assert('gettype($className) == "string" && preg_match("/^[a-z_][a-z0-9_]*$/i", $className)');
 
@@ -44,7 +60,7 @@ class SotmarketRPCClient
             return $this->_objectsByClassName[$className];
         }
 
-        if (class_exists($className, TRUE)) {
+        if (class_exists($className,TRUE)) {
             $rc = new ReflectionClass($className);
             assert('$rc->hasMethod("instance")');
             $rm = $rc->getMethod("instance");
@@ -53,7 +69,7 @@ class SotmarketRPCClient
             $result = $rm->invoke(NULL);
             assert('$result instanceof ' . $className);
         } else {
-            $result = new SotmarketRPCClientProxy($this->_config, $this->_callback, $className);
+            $result = new SotmarketRPCClientProxy($this->_config,$this->_callback,$className);
         }
         $this->_objectsByClassName[$className] = $result;
         return $result;
@@ -61,160 +77,149 @@ class SotmarketRPCClient
 
 
     /**
-     * Функция добавляет задачу для обращения через RPC
-     * @var string $sTaskName названия задачи
-     * @var string $sClassName названия удаленного класса
-     * @var string $sMethod название вызываемого метода
-     * @var array $aArgs массив аргументов
+     * Р¤СѓРЅРєС†РёСЏ РґРѕР±Р°РІР»СЏРµС‚ Р·Р°РґР°С‡Сѓ РґР»СЏ РѕР±СЂР°С‰РµРЅРёСЏ С‡РµСЂРµР· RPC
+     * @var string $sTaskName  РЅР°Р·РІР°РЅРёСЏ Р·Р°РґР°С‡Рё
+     * @var string $sClassName РЅР°Р·РІР°РЅРёСЏ СѓРґР°Р»РµРЅРЅРѕРіРѕ РєР»Р°СЃСЃР°
+     * @var string $sMethod    РЅР°Р·РІР°РЅРёРµ РІС‹Р·С‹РІР°РµРјРѕРіРѕ РјРµС‚РѕРґР°
+     * @var array  $aArgs      РјР°СЃСЃРёРІ Р°СЂРіСѓРјРµРЅС‚РѕРІ
      **/
-    public function vAddTask($sTaskName, $sClassName, $sMethod, $aArgs = array())
-    {
+    public function vAddTask($sTaskName,$sClassName,$sMethod,$aArgs = array()) {
         /**
-         * При добавлении новой задачи, проверим не находится ли она уже в кэше
+         * РџСЂРё РґРѕР±Р°РІР»РµРЅРёРё РЅРѕРІРѕР№ Р·Р°РґР°С‡Рё, РїСЂРѕРІРµСЂРёРј РЅРµ РЅР°С…РѕРґРёС‚СЃСЏ Р»Рё РѕРЅР° СѓР¶Рµ РІ РєСЌС€Рµ
          **/
         $bCached = false;
-        if (preg_match('@(.+)_cached@', $sMethod, $aMatches)) {
-            $sMethod = $aMatches[1];
-            $bCached = true;
+        // РјРµРЅСЏРµРј РєРѕРґРёСЂРѕРІРєСѓ РµСЃР»Рё СЌС‚Рѕ РЅСѓР¶РЅРѕ.
+        $aArgs2 = $this->_convertObjectRecursiveWithCopy($aArgs,true);
+        if (preg_match('@(.+)_cached@',$sMethod,$aMatches)) {
+            $sMethod    = $aMatches[1];
+            $bCached    = true;
             $sCacheHash = $sMethod . md5($sClassName . '_' . serialize($aArgs));
-            if ($this->_oCache->bGetCache($sCacheHash, $sResult)) {
+            if ($this->_oCache->bGetCache($sCacheHash,$sResult)) {
                 $this->_aResponse[$sTaskName] = $sResult;
                 return;
             }
         }
-        // Если задачи нет в кэше, добавляем её в список задач
+        // Р•СЃР»Рё Р·Р°РґР°С‡Рё РЅРµС‚ РІ РєСЌС€Рµ, РґРѕР±Р°РІР»СЏРµРј РµС‘ РІ СЃРїРёСЃРѕРє Р·Р°РґР°С‡
         $this->_aTasks[$sTaskName] = array(
-            'className' => $sClassName,
+            'className'  => $sClassName,
             'methodName' => $sMethod,
-            'saveCache' => $bCached,
-            'args' => $aArgs,
-            'auxdata' =>
-            $this->_callback->getRequestAuxData($sClassName, $sMethod));
+            'saveCache'  => $bCached,
+            'args'       => $aArgs2,
+            'auxdata'    =>
+            $this->_callback->getRequestAuxData($sClassName,$sMethod));
     }
 
     /**
-     * Произведем обращение к RPC серверу за нашими задачами.
+     * РџСЂРѕРёР·РІРµРґРµРј РѕР±СЂР°С‰РµРЅРёРµ Рє RPC СЃРµСЂРІРµСЂСѓ Р·Р° РЅР°С€РёРјРё Р·Р°РґР°С‡Р°РјРё.
      **/
-    public function process()
-    {
-        if ($this->isSpider(@$_SERVER['REMOTE_ADDR'], @$_SERVER['HTTP_USER_AGENT'])) {
-            throw new SotmarketRPCException('Робот');
+    public function process() {
+        if ($this->isSpider(@$_SERVER['REMOTE_ADDR'],@$_SERVER['HTTP_USER_AGENT'])) {
+            throw new SotmarketRPCException('Р РѕР±РѕС‚');
         }
-        // если нет задач, нечего запускать
+        // РµСЃР»Рё РЅРµС‚ Р·Р°РґР°С‡, РЅРµС‡РµРіРѕ Р·Р°РїСѓСЃРєР°С‚СЊ
         if (count($this->_aTasks) == 0) return;
-        // на всякий случай создаю переменную не true/false а 1/0
-        $iMultiple = (count($this->_aTasks) > 1) ? 1 : 0;
+        $bMultiple = (count($this->_aTasks) > 1);
 
-        if ($iMultiple === 1) {
+        if ($bMultiple) {
             $aRequestData = $this->_aTasks;
         } else {
             $aRequestData = current($this->_aTasks);
         }
 
         $serializer = new SotmarketSerializer('php-rpc');
-        $request = $serializer->serialize($aRequestData);
-        $http = new SotmarketHttp();
-        $url = $this->_config['serverUrl'];
-        $get = array();
-        $post = array('RPCRequest' => $request,
-                      'multiple' => $iMultiple,
-                      'site_id' => $this->_config['site_id']);
-        // Для того чтобы передавать информацию в заголовках, надо установить заголовки в CURLOPT_HTTPHEADER
-        // А для того, чтобы получать ответные заголовки надо установить CURLOPT_HEADER
+        $request    = $serializer->serialize($aRequestData);
+        $http       = new SotmarketHttp();
+        $url        = $this->_config['serverUrl'];
+        $get        = array();
+        $post       = array('RPCRequest' => $request,
+            // РЅР° РІСЃСЏРєРёР№ СЃР»СѓС‡Р°Р№ СЃРѕР·РґР°СЋ РїРµСЂРµРґР°СЋ РїРµСЂРµРјРµРЅРЅСѓСЋ РЅРµ true/false Р° 1/0
+                            'multiple'   => $bMultiple ? 1 : 0,
+                            'site_id'    => $this->_config['site_id']);
+        // Р”Р»СЏ С‚РѕРіРѕ С‡С‚РѕР±С‹ РїРµСЂРµРґР°РІР°С‚СЊ РёРЅС„РѕСЂРјР°С†РёСЋ РІ Р·Р°РіРѕР»РѕРІРєР°С…, РЅР°РґРѕ СѓСЃС‚Р°РЅРѕРІРёС‚СЊ Р·Р°РіРѕР»РѕРІРєРё РІ CURLOPT_HTTPHEADER
+        // Рђ РґР»СЏ С‚РѕРіРѕ, С‡С‚РѕР±С‹ РїРѕР»СѓС‡Р°С‚СЊ РѕС‚РІРµС‚РЅС‹Рµ Р·Р°РіРѕР»РѕРІРєРё РЅР°РґРѕ СѓСЃС‚Р°РЅРѕРІРёС‚СЊ CURLOPT_HEADER
         $headers = array($serializer->sHeaderLine());
-        // Передадим UA и IP в заголовках
+        // РџРµСЂРµРґР°РґРёРј UA Рё IP РІ Р·Р°РіРѕР»РѕРІРєР°С…
         if (isset($_SERVER['HTTP_USER_AGENT'])) {
             $headers[] = 'mag-client-ua: ' . $_SERVER['HTTP_USER_AGENT'];
         }
         if (isset($_SERVER['REMOTE_ADDR'])) {
             $headers[] = 'mag-client-ip: ' . $_SERVER['REMOTE_ADDR'];
         }
-        $options = array(CURLOPT_HTTPHEADER => $headers, CURLOPT_HEADER => true);
-
-        $response = $http->request($url, $get, $post, $options);
-
+        $options = array(CURLOPT_HTTPHEADER => $headers,
+                         CURLOPT_HEADER     => true);
+        $response = $http->request($url,$get,$post,$options);
         if (!$response->ok()) {
             throw  new SotmarketRPCException("RPC client: HTTP request error " . $response->status() . " for URL: $url");
         }
 
         try {
-            $aFullResponse = $serializer->unserialize($response->content(), $response->sGetHeader(SotmarketSerializer::HEADER_ENCODING_BITS));
+            $aFullResponse = $serializer->unserialize($response->content(),$response->sGetHeader(SotmarketSerializer::HEADER_ENCODING_BITS));
             assert('gettype($aFullResponse) == "array"');
         } catch (SotmarketRPCException $e) {
             throw new SotmarketRPCException("error" . $response->content());
         } catch (Exception $e) {
-            // Эта ошибка обычно вылетает, когда в поток попадают PHP errors/warnings/hints.
+            // Р­С‚Р° РѕС€РёР±РєР° РѕР±С‹С‡РЅРѕ РІС‹Р»РµС‚Р°РµС‚, РєРѕРіРґР° РІ РїРѕС‚РѕРє РїРѕРїР°РґР°СЋС‚ PHP errors/warnings/hints.
             dumpfile("RPC client: response deserialization error. Raw content: " . $response->content());
             throw new SotmarketException("RPC client: response deserialization error" . $response->content());
         }
-
-        if (isset($aFullResponse['exception'])) {
-            $e = $aFullResponse['exception'];
-            // для обратной совместимости приложений использующих клиент
-            if ($e instanceof InfoRPCException) {
-                $e2 = new InfoException($e->getMessage(), $e->getCode());
-                $e = $e2;
-            }
-            throw $e;
-        }
         /**
-         * Меняю к новой структуре запросов
+         * РњРµРЅСЏСЋ Рє РЅРѕРІРѕР№ СЃС‚СЂСѓРєС‚СѓСЂРµ Р·Р°РїСЂРѕСЃРѕРІ
          **/
-        if ($iMultiple !== 1) {
-            $sTaskName = key($this->_aTasks);
-            $aNewResponse = array($sTaskName => $aFullResponse);
+        if (!$bMultiple) {
+            $sTaskName     = key($this->_aTasks);
+            $aNewResponse  = array($sTaskName => $aFullResponse);
             $aFullResponse = $aNewResponse;
         }
         foreach ($aFullResponse as $sTaskName => $aTaskResponse) {
             if (!$aTaskResponse) continue;
             if ($aTaskResponse['auxdata']) {
-                $this->_callback->processResponseAuxData($this->_aTasks[$sTaskName]['className'],
-                                                         $this->_aTasks[$sTaskName]['methodName'], $aTaskResponse['auxdata']);
+                $this->_callback->processResponseAuxData($this->_aTasks[$sTaskName]['className'],$this->_aTasks[$sTaskName]['methodName'],$aTaskResponse['auxdata']);
             }
             if (isset($aTaskResponse['exception'])) {
                 $re = $aTaskResponse['exception'];
+                $re = $this->_convertObjectRecursiveWithCopy($re);
             } else {
                 $re = $aTaskResponse['result'];
-                // Сохраняем результат в кэше, если это надо делать
+                $re = $this->_convertObjectRecursiveWithCopy($re);
+                // РЎРѕС…СЂР°РЅСЏРµРј СЂРµР·СѓР»СЊС‚Р°С‚ РІ РєСЌС€Рµ, РµСЃР»Рё СЌС‚Рѕ РЅР°РґРѕ РґРµР»Р°С‚СЊ
                 if ($this->_aTasks[$sTaskName]['saveCache']) {
                     $sCacheHash = $this->_aTasks[$sTaskName]['methodName'] . md5($this->_aTasks[$sTaskName]['className'] . '_' . serialize($this->_aTasks[$sTaskName]['args']));
-                    $this->_oCache->vSaveCache($sCacheHash, $re);
+                    $this->_oCache->vSaveCache($sCacheHash,$re);
                 }
             }
             $this->_aResponse[$sTaskName] = $re;
         }
-        // очищаем задачи
+        // РѕС‡РёС‰Р°РµРј Р·Р°РґР°С‡Рё
         $this->_aTasks = null;
     }
 
     /**
      *
-     *  Функция возвращает полученную информацию по задаче
-     * @var string $sTaskName название задачи
-     * @return mixed|false полученные данные от RPC сервера
+     *  Р¤СѓРЅРєС†РёСЏ РІРѕР·РІСЂР°С‰Р°РµС‚ РїРѕР»СѓС‡РµРЅРЅСѓСЋ РёРЅС„РѕСЂРјР°С†РёСЋ РїРѕ Р·Р°РґР°С‡Рµ
+     * @var string $sTaskName РЅР°Р·РІР°РЅРёРµ Р·Р°РґР°С‡Рё
+     * @return mixed|false РїРѕР»СѓС‡РµРЅРЅС‹Рµ РґР°РЅРЅС‹Рµ РѕС‚ RPC СЃРµСЂРІРµСЂР°
      **/
-    public function aGetData($sTaskName)
-    {
+    public function aGetData($sTaskName) {
         if (!isset($this->_aResponse[$sTaskName]))
             return false;
         if ($this->_aResponse[$sTaskName] instanceof Exception
-            || $this->_aResponse[$sTaskName] instanceof InfoException) {
+                || $this->_aResponse[$sTaskName] instanceof InfoException
+        ) {
             throw $this->_aResponse[$sTaskName];
         }
         return $this->_aResponse[$sTaskName];
     }
 
     /**
-     * Проверка ip и юзерагентов на принадлежность к ботам.
+     * РџСЂРѕРІРµСЂРєР° ip Рё СЋР·РµСЂР°РіРµРЅС‚РѕРІ РЅР° РїСЂРёРЅР°РґР»РµР¶РЅРѕСЃС‚СЊ Рє Р±РѕС‚Р°Рј.
      **/
-    public function isSpider($user_ip, $user_agent)
-    {
+    public function isSpider($user_ip,$user_agent) {
         if (empty($_COOKIE["PHPSESSID"])) session_start();
-        if (isset($_SESSION['sotmarket_spider'])){
+        if (isset($_SESSION['sotmarket_spider'])) {
             return $_SESSION['sotmarket_spider'];
         }
         /**
-         * Выполняет проверку по IP
+         * Р’С‹РїРѕР»РЅСЏРµС‚ РїСЂРѕРІРµСЂРєСѓ РїРѕ IP
          */
         $this->_vLoadSpiderFiles();
         if ($user_ip) {
@@ -228,13 +233,13 @@ class SotmarketRPCClient
         }
 
         /**
-         * Выполняет проверку на User Agent
+         * Р’С‹РїРѕР»РЅСЏРµС‚ РїСЂРѕРІРµСЂРєСѓ РЅР° User Agent
          */
         $user_agent = strtolower($user_agent);
         if ($user_agent) {
             {
                 for ($i = 0; $i < count($this->mUserAgents); $i++)
-                    if (substr_count($user_agent, $this->mUserAgents[$i])) {
+                    if (substr_count($user_agent,$this->mUserAgents[$i])) {
                         $_SESSION['sotmarket_spider'] = true;
                         return true;
                     }
@@ -243,44 +248,102 @@ class SotmarketRPCClient
         $_SESSION['sotmarket_spider'] = false;
         return false;
     }
+
     /**
-     * @throws SotmarketException в случае если файл не найден, проверьте пути..
-     * Файл должен быть
+     * @throws SotmarketException РІ СЃР»СѓС‡Р°Рµ РµСЃР»Рё С„Р°Р№Р» РЅРµ РЅР°Р№РґРµРЅ, РїСЂРѕРІРµСЂСЊС‚Рµ РїСѓС‚Рё..
+     * Р¤Р°Р№Р» РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ
      * @return
      */
-    private function _vLoadSpiderFiles()
-    {
+    private function _vLoadSpiderFiles() {
         if (!empty($this->mUserAgents)) return;
-        $this->_vLoadFileInArray('mUserAgents', 'spiders_ban.txt');
-        $this->_vLoadFileInArray('sFileIps', 'ips_ban.txt');
+        $this->_vLoadFileInArray('mUserAgents','spiders_ban.txt');
+        $this->_vLoadFileInArray('sFileIps','ips_ban.txt');
     }
+
     /**
-     * Загрузка файлов
-     * И проверка нужно ли обновлять файлы.
+     * Р—Р°РіСЂСѓР·РєР° С„Р°Р№Р»РѕРІ
+     * Р РїСЂРѕРІРµСЂРєР° РЅСѓР¶РЅРѕ Р»Рё РѕР±РЅРѕРІР»СЏС‚СЊ С„Р°Р№Р»С‹.
      **/
-    private function _vLoadFileInArray($sArrName, $sFile){
-         $sFullName = $this->_config['data'] . $sFile;
-         $this->_updateBanFiles($sFullName, $sFile);
-         if (!is_file($sFullName)) {
-            throw new SotmarketException("Не найден файл " . $sFullName);
+    private function _vLoadFileInArray($sArrName,$sFile) {
+        $sFullName = $this->_config['data'] . $sFile;
+        $this->_updateBanFiles($sFullName,$sFile);
+        if (!is_file($sFullName)) {
+            throw new SotmarketException("РќРµ РЅР°Р№РґРµРЅ С„Р°Р№Р» " . $sFullName);
         }
-        $this->$sArrName = array_map('rtrim', file($sFullName));
+        $this->$sArrName = array_map('rtrim',file($sFullName));
     }
+
     /**
      * @param  string $sLocalFile
      * @param  string $sFile
      * @return void
      **/
-    private function _updateBanFiles($sLocalFile, $sFile){
-        $iExpireTime = 24*7*60*60; // неделя
-        if (filemtime($sLocalFile) + $iExpireTime < time()) {   
-            $sRemoteFile = SotmarketRPCClient::UPDATE_SERVER_FILES . '/'. $sFile;
-            $sContent = @file_get_contents($sRemoteFile);
-            if (empty($sContent)){
+    private function _updateBanFiles($sLocalFile,$sFile) {
+        $iExpireTime = 24 * 7 * 60 * 60; // РЅРµРґРµР»СЏ
+        if (!file_exists($sLocalFile)) return;
+        if (filemtime($sLocalFile) + $iExpireTime < time()) {
+            $sRemoteFile = SotmarketRPCClient::UPDATE_SERVER_FILES . '/' . $sFile;
+            $sContent    = @file_get_contents($sRemoteFile);
+            if (empty($sContent)) {
                 @touch($sLocalFile);
-            }else{
-                @file_put_contents($sLocalFile, $sContent);
+            } else {
+                @file_put_contents($sLocalFile,$sContent);
             }
         }
+    }
+
+    /**
+     * Р¤СѓРЅРєС†РёР№ РіРµР№С‚ Рє С„СѓРЅРєС†РёРё РїРµСЂРµРєРѕРґРёСЂРѕРІРєРё, РЅСѓР¶РЅР° С‡С‚РѕР±С‹ РЅРµ СѓРєР°Р·С‹РІР°С‚СЊ РІ РІС…РѕРґРЅСѓСЋ Рё РІС‹С…РѕРґРЅСѓСЋ РєРѕРґРёСЂРѕРІРєРё.
+     * @param mixed  $oObject         РѕР±СЉРµРєС‚ РєРѕС‚РѕСЂС‹Р№ РЅР°РґРѕ РїРµСЂРµРєРѕРґРёСЂРѕРІР°С‚СЊ
+     * @param bool   $bClientToServer РєРѕРЅРІРµСЂС‚Р°С†РёСЏ РѕС‚ РєРѕРґРёСЂРѕРІРєРё РєР»РёРµРЅС‚Р° Рє РєРѕРґРёСЂРѕРІРєРµ СЃРµСЂРІРµСЂР°, РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ РєРѕРЅРІРµСЂС‚Р°С†РёСЏ РёРґРµС‚ РѕС‚ СЃРµСЂРІРµСЂР° Рє РєР»РёРµРЅС‚Сѓ
+     * @return mixed РєРѕРїРёСЏ РІС…РѕРґРЅРѕРіРѕ РѕР±СЉРµРєС‚Р° РµСЃР»Рё РѕРЅ РєРѕРЅРІРµСЂС‚РёСЂРѕРІР°Р»СЃСЏ, РµСЃР»Рё РєРѕРЅРІРµСЂС‚Р°С†РёСЏ РЅРµ РїСЂРѕРёР·РІРѕРґРёР»Р°СЃСЊ СЃР°Рј РѕР±СЉРµРєС‚
+     */
+    public function _convertObjectRecursiveWithCopy($oObject,$bClientToServer = false) {
+        if ($bClientToServer) {
+            return self::convertObjectRecursiveWithCopy($oObject,$this->sClientEncoding,$this->sServerEncoding);
+        } else {
+            return self::convertObjectRecursiveWithCopy($oObject,$this->sServerEncoding,$this->sClientEncoding);
+
+        }
+    }
+
+    /**
+     * Р’С‹РїРѕР»РЅСЏРµС‚ СЂРµРєСѓСЂСЃРёРІРЅСѓСЋ СЃРјРµРЅСѓ РєРѕРґРёСЂРѕРІРѕРє РґР»СЏ РїРµСЂРµРјРµРЅРЅРѕР№, РґР»СЏ РјР°СЃСЃРёРІРѕРІ Рё РѕР±СЉРµРєС‚РѕРІ
+     * @static
+     * @param mixed  $oObject        РїРµСЂРµРґР°РІР°РµРјС‹Р№ РѕР±СЉРµРєС‚ РґР»СЏ РїРµСЂРµРєРѕРґРёСЂРѕРІР°РЅРёСЏ
+     * @param string $sInputCharset  РёСЃС…РѕРґРЅР°СЏ РєРѕРґРёСЂРѕРІРєР°
+     * @param string $sOutputCharset РєРѕРґРёСЂРѕРІРєР° РЅР° РІС‹С…РѕРґРµ
+     * @return mixed РѕР±СЉРµРєС‚, РјР°СЃСЃРёРІ
+     */
+    public static function convertObjectRecursiveWithCopy($oObject,$sInputCharset = 'cp1251',$sOutputCharset = 'utf-8') {
+        if (empty($sOutputCharset)
+                || empty($sInputCharset)
+                || $sInputCharset == $sOutputCharset
+        ) return $oObject;
+
+        if (is_object($oObject)) {
+            if ($oObject instanceof Exception) {
+                $oResult = new SotmarketException(self::convertObjectRecursiveWithCopy($oObject->getMessage(),$sInputCharset,$sOutputCharset));
+            } else {
+                $oResult     = clone $oObject;
+                $aProperties = get_object_vars($oObject);
+                foreach ($aProperties as $sKeyName => $sKeyValue) {
+                    $oResult->$sKeyName = self::convertObjectRecursiveWithCopy($sKeyValue,$sInputCharset,$sOutputCharset);
+                }
+            }
+        }
+        elseif (is_array($oObject))
+        {
+            $oResult = array();
+            foreach ($oObject as $sKeyName => $sKeyValue) {
+                $oResult[$sKeyName] = self::convertObjectRecursiveWithCopy($sKeyValue,$sInputCharset,$sOutputCharset);
+            }
+        }
+        elseif (is_string($oObject)) {
+            $oResult = iconv($sInputCharset,$sOutputCharset,$oObject);
+        } else {
+            $oResult = $oObject;
+        }
+        return $oResult;
     }
 }

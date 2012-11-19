@@ -43,7 +43,7 @@ while ($aRow = $db->get_array()) {
 	$aConfig[$aRow['sm_key']] = $aRow['sm_value'];
 }
 
-$aConfig['home_url'] = substr( $config['http_home_url'] ,0 , -1 );
+$aConfig['home_url'] = $config['http_home_url'];
 // освобождаем db
 $db->free();
 
@@ -116,7 +116,6 @@ try {
 	$sReturn = $oSotmarketProduct->getProducts( $aProductIds, $sProductName, $iCnt , $sTemplate, $sImageSize, $aCategories );
 } catch (Exception $e) {
 	$sReturn = $e->getMessage();
-	$sReturn = iconv('cp1251','utf-8',$sReturn);
 }
 
 //проверка на доп поля в тексте

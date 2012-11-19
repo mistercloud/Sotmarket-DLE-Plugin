@@ -5,6 +5,17 @@
  **/
 
 class SotmarketClientCacheFile extends SotmarketClientCache {
+
+    public $sTmpPath = null;
+
+    public function __construct($config)
+    {
+        if (!empty($config['tmpPath'])) {
+            $this->sTmpPath = $config['tmpPath'];
+            parent::__construct($config);
+        }
+    }
+
     /**
      * @var string  $sHash          ��� ����
      * @var mixed   $sResult        ���������� � ������� ������������ ������ �� ����
@@ -75,7 +86,7 @@ class SotmarketClientCacheFile extends SotmarketClientCache {
         $sFileName = $this->sGetFileName($sHash,true);
         $res       = file_put_contents($sFileName,$sData);
         if ($res == false) {
-            throw new InfoException('Not writable cache. Check config and rights on tmp dir. ' . $sFileName);
+            throw new InfoException('Not writable cache. Check config and rights on tmp dir.' . $sFileName);
         }
     }
 }

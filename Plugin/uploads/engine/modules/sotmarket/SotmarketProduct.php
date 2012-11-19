@@ -154,7 +154,7 @@ class SotmarketProduct {
         foreach( $aProductsInfo as $iProductId => $aProductInfo ){
 
             $sImgUrl = $aProductsInfo[$iProductId]['image_url'];
-            $sLocalImgUrl = 'img/' . $iProductId . '-' . $sImageSize . $this->oImageCache->sGetExtensionWithDot($sImgUrl);
+            $sLocalImgUrl = $iProductId . '-' . $sImageSize . $this->oImageCache->sGetExtensionWithDot($sImgUrl);
             if (!$this->oImageCache->bCheckCache($sLocalImgUrl)) {
                 if ($this->oImageCache->bSaveRemote($sLocalImgUrl, $sImgUrl)) {
                     $sFullImgUrl = $this->sHomeUrl.$this->oImageCache->sGetImagePath($sLocalImgUrl);
@@ -168,8 +168,6 @@ class SotmarketProduct {
 
             }
 
-            $aProductInfo['name'] = iconv( 'cp1251','utf-8',$aProductInfo['name'] );
-
             $sProductUrl = $aProductInfo['info_url'] . '?ref=' . $this->iPartnerId;
             $sProductUrl .= '&subref=plug_dle.site_'.$this->iSiteId.'.type_'.$this->sType.'.product_'.$iProductId;
             if ($this->sLabel){
@@ -180,18 +178,6 @@ class SotmarketProduct {
                 $sProductUrl = '/?srdr='.urlencode(base64_encode($sProductUrl));
             }
 
-            //если тип - корзина
-            $aProductInfo['full_url'] = '';
-            $aProductInfo['script_url'] = '';
-            if ( $this->sBlockType == 'shop' ){
-
-                $aProductInfo['full_url'] = "<a href='" . $sProductUrl . "'>";
-                $aProductInfo['script_url'] = "<a href='#' onClick='addProductToCart( " . $iProductId . ", " .
-                    $aProductInfo['price'] . " , \"" . $aProductInfo['name']. "\"); alert(\"Товар добавлен в корзину\"); return false'>";
-
-
-            }
-
             $aProducts[] = array(
                 '{id}' => $iProductId,
                 '{sale}' => $aProductInfo['isSale'] ? 'SALE&nbsp;' : '',
@@ -200,7 +186,6 @@ class SotmarketProduct {
                 '{url}' => $sProductUrl,
                 '{image_src}' => $sFullImgUrl,
                 '{full_url}' => $aProductInfo['full_url'],
-                '{script_url}' => $aProductInfo['script_url'],
 
             );
         }
@@ -208,12 +193,6 @@ class SotmarketProduct {
 
 
         $sReturn = $this->getRenderedData( $aProducts , $sTemplate);
-
-        if ( $this->sBlockType == 'shop' ){
-            foreach($aProducts as $aProduct ){
-                $sReturn = str_replace( $aProduct['{full_url}'] , $aProduct['{script_url}'], $sReturn);
-            }
-        }
 
         return $sReturn;
 

@@ -15,6 +15,7 @@
           'serverUrl' => 'http://update.sotmarket.ru/api/rpc.php',
           'tmpPath'  => 'engine/modules/sotmarket/_data/tmp/',
           'tmpExpire' =>  24,
+		  'encoding'  => 'utf-8',
 		),
 	);
 ?>

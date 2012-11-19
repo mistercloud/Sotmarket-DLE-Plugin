@@ -1,39 +1,88 @@
 <?php
 /**
- * Интерфейс для класса кэша
- * @ver 0.2
- * @author Андрей Смирнов
+ * пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
+ * @ver    0.4
+ * @author пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
  **/
 
-class SotmarketClientCache
-{
+class SotmarketClientCache {
     // @var $iTmpExpireInSeconds
-    // время на которое кэшируются контент
-    // на умолчанию на один день
+    // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+    // пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 
     protected $iExpireTime = 86400; //24 * 60 * 60;
+    protected $sLocalCacheDir = null; // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
+    protected $iDirNameLength = 1;
 
-    public function __construct($config)
-    {
+    public static function getInstance($config) {
+        $sType = isset($config['cacheType']) ? $config['cacheType'] : '';
+        switch ($sType) {
+            case 'file':
+                return new SotmarketClientCacheFile($config);
+            default:
+                return new SotmarketClientCache($config);
+        }
+    }
+
+    public function __construct($config) {
         if (!empty($config['tmpExpire'])) {
             $this->iExpireTime = $config['tmpExpire'] * 60 * 60;
+        }
+        if (empty($config['tmpPath'])) {
+            throw new Exception('please, add tmpPath in config section');
+        }
+        $this->sLocalCacheDir = $config['tmpPath'];
+        if (isset($config['dirLength'])) {
+            $this->iDirNameLength = (int) $config['dirLength'];
         }
     }
 
     /**
-     * @var string $sHash хэш кэша
-     * @var mixed $sResult переменная в которой возвращаются данные из кэша
-     * @return boolean true если удалось прочитать данные из кэша
+     * @var string $sHash   пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
+     * @var mixed  $sResult пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ
+     * @return boolean true пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ
      **/
-    public function bGetCache($sHash, &$sResult)
-    {
+    public function bGetCache($sHash,&$sResult) {
+        return false;
     }
 
     /**
-     * @var string $sHash хэш кэша
-     * @var mixed $sResult переменная в которой передаются
+     * @var string $sHash   пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
+     * @var mixed  $sResult пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
      **/
-    public function vSaveCache($sHash, $sResult)
-    {
+    public function vSaveCache($sHash,$sResult) {
+        return;
+    }
+
+    /**
+     * пїЅпїЅ hash пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ.
+     * @param string $sHash  пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
+     * @param bool   $bMkDir пїЅпїЅпїЅпїЅ true пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ, пїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
+     * @return string пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+     */
+    public function sGetFileName($sHash,$bMkDir = false) {
+        $sDirPrefix = '';
+        if ($this->iDirNameLength > 0) {
+            $sDirPrefix = substr($sHash,0,$this->iDirNameLength);
+            if ($bMkDir && !is_dir($this->sLocalCacheDir . $sDirPrefix)) {
+                mkdir($this->sLocalCacheDir . $sDirPrefix);
+	            chmod($this->sLocalCacheDir . $sDirPrefix,0777);
+            }
+            $sDirPrefix .= '/';
+        }
+        return $this->sLocalCacheDir . $sDirPrefix . $sHash;
+    }
+
+    /**
+     * пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅ
+     * @param $sHash
+     * @return string
+     */
+    public function sGetRelativePath($sHash) {
+        $sDirPrefix = '';
+        if ($this->iDirNameLength > 0) {
+            $sDirPrefix = substr($sHash,0,$this->iDirNameLength) . '/';
+        }
+        return $sDirPrefix . $sHash;
     }
 }
