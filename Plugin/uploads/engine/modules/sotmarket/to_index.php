@@ -10,7 +10,7 @@ $aMatches = array();
 preg_match_all( "%\[sotmarket\].*?\[/sotmarket\]%si" , $tpl->result['main'], $aMatches);
 foreach( $aMatches[0] as $sMatche){
 
-    if (!strpos($sMatche,'sotmarket.ru/product') && !strpos($sMatche,'srdr=') && !strpos($sMatche,'addProductToCart')){
+    if (!strpos($sMatche,'sotmarket.ru/product') && !strpos($sMatche,'srdr=')){
         $tpl->result['main'] = str_replace($sMatche,'', $tpl->result['main'] );
     }
 }

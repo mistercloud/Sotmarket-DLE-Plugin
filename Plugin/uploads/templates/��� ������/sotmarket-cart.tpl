@@ -1,1 +1,0 @@
-{include file="engine/modules/sotmarket/sotmarket_mag_order.php"}

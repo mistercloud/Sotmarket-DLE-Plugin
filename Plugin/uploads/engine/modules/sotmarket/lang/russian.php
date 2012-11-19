@@ -21,9 +21,6 @@ $aTranslations = array(
 				<ul>
 					<li>Введите Ваш site_id в партнерке sotmarket.ru в настройках модуля.</li>
 					<li>Установите директории <b>engine/modules/sotmarket/_data/</b> и всем её поддиректориям права на запись. </li>
-					<li>Добавьте строку
-						<blockquote>{include file=&quot;engine/modules/sotmarket/order.php?product_id=[xfvalue_sotmarket_product_id]&quot;}</blockquote>
-						в нужном месте шаблонов shortstory.tpl и(или) fullstory.tpl</li>
 					<li>При создании и редактировании добавьте в дополнительное поле ID товара. ID товара вы можете получить в http://b2b.sotmarket.ru в разделе товары</li>
 					<li>Если Вас не устраивает формат вывода формы заказа Вы можете всегда изменить шаблон в файле <b>templates/sotmarket.tpl</b></li>
 				</ul>
@@ -35,19 +32,12 @@ $aTranslations = array(
 $aMandatoryParams = array(
 	'SOTMARKET_PARTNER_ID' => 'Id партнера sotmarket.ru',
 	'SOTMARKET_SITE_ID' => 'Id сайта в партнерке sotmarket.ru',
-	'SOTMARKET_FROM' => 'Метка',
-    'SOTMARKET_LABEL_TYPE' => 'Тип метки',
-	'SOTMARKET_BLOCK_TYPE' => 'Способ отображения блока' ,
+	'SOTMARKET_SUBREF' => 'Метка',
 	'SOTMARKET_LINK_TYPE' => 'Тип ссылок в блоках',
 	'SOTMARKET_BLOCK_STATUSES' => 'Фильтр по статусам наличия товара',
-    'SOTMARKET_CART_URL' => 'Адрес страницы оформления заказа',
 );
 
 $aMandatoryParamsAsSelect = array(
-	'SOTMARKET_BLOCK_TYPE' => array(
-		'informer' => 'Покупка на sotmarket' ,
-		'shop' => 'Покупка на сайте партнера'
-	),
 	'SOTMARKET_LINK_TYPE' => array(
 		'link' => 'Прямая ссылка на sotmarket',
 		'redirect' => 'Ссылка с redirect'
@@ -56,10 +46,7 @@ $aMandatoryParamsAsSelect = array(
 		'all' => 'Отображать все товары',
 		'available' => 'Только товары в наличии'
 	),
-    'SOTMARKET_LABEL_TYPE' => array(
-        'from' => 'Метка from',
-        'subref' => 'Метка subref',
-    ),
+
 );
 
 ?>
