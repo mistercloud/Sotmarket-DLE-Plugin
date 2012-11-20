@@ -14,6 +14,13 @@ class SotmarketClientImageCacheFile extends SotmarketClientCacheFile {
             $this->sDefaultImagePath = '../default.jpg';
         }
         parent::__construct($config);
+		
+
+        if (isset($config['imgPath'])){
+            
+            $this->sTmpPath = $config['imgPath'];
+            $this->sLocalCacheDir = $config['imgPath'];
+        }
     }
 
     /**

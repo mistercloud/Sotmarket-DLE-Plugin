@@ -16,6 +16,7 @@
           'tmpPath'  => 'engine/modules/sotmarket/_data/tmp/',
           'tmpExpire' =>  24,
 		  'encoding'  => 'utf-8',
+		  //'imgPath' => 'sotm_images/',
 		),
 	);
 ?>
