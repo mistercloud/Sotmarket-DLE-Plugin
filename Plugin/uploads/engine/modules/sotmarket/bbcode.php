@@ -13,6 +13,20 @@ foreach($aTemplateFiles as $sTemplate){
 $sSotmarketBB = <<<HTML
 
 <SCRIPT type=text/javascript>
+    $(document).ready(function() {
+        $('#sotmarket-type').change( function(){
+
+            if ($(this).val() == 'popular'){
+                $('#label_product_name').html('Название бренда:');
+                $('#product_id_p').hide();
+
+            }else {
+                $('#label_product_name').html('Название товара:');
+                $('#product_id_p').show();
+            }
+        });
+    });
+
     function sotmarket_tag(forWisiwig , ed)
     {
         $( "#sotmarket_dialog" ).dialog({
@@ -85,14 +99,15 @@ $sSotmarketBB = <<<HTML
 		    <option value="products" selected>Товары</option>
 			<option value="related">Аксесуары</option>
 			<option value="analog">Похожие товары</option>
+			<option value="popular">Популярные товары</option>
 		</select>
 	</p>
-	<p>
+	<p id="product_id_p">
 		<label>ID товара (товаров через запятую):</label><br/>
 		<input type="text" id="sotmarket-product-id" value="" />
 	</p>
 	<p>
-		<label>Название товара:</label><br/>
+		<label id="label_product_name">Название товара:</label><br/>
 		<input type="text" id="sotmarket-product-name" value="" />
 	</p>
     <p>

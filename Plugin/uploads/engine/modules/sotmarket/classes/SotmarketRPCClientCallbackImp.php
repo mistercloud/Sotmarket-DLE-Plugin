@@ -2,10 +2,10 @@
 	final class SotmarketRPCClientCallbackImp extends SotmarketRPCClientCallback 
 	{
 		/**
-		 * Конструктор
+		 * пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 		 *
-		 * @param int				$affiliateSiteId	идентификатор партнерского сайта
-		 * @param SotmarketSession 	$session			сессия пользователя
+		 * @param int				$affiliateSiteId	пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
+		 * @param SotmarketSession 	$session			пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 		 */
 		
 		function __construct($affiliateSiteId, $session = null) {
@@ -18,7 +18,7 @@
 		 * 
 		 * @return SotmarketRPCRequestAuxDataImp
 		 */
-		function getRequestAuxData($className, $methodName) {
+		public function getRequestAuxData($className, $methodName) {
 			$result 					= new SotmarketRPCRequestAuxDataImp();
 			$result->affiliateSiteId 	= $this->_affiliateSiteId;
 			$result->userSessionHash	= $this->_session;
@@ -30,7 +30,7 @@
 		/**
 		 * Overriden (with adjusted signature).
 		 */
-		function processResponseAuxData($className, $methodName, SotmarketRPCResponseAuxDataImp $data) {
+		function processResponseAuxData($className, $methodName, SotmarketRPCResponseAuxData $data) {
 			@$_SESSION['sotmarket:serverSessionValidationHash'] = $data->verificationHash;
 		}
 		

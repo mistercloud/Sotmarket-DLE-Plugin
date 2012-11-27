@@ -42,8 +42,7 @@ class SotmarketProduct {
 
         $this->sHomeUrl = $aConfig['home_url'];
 
-
-        $aTypes = array('products','related','analog');
+        $aTypes = array('products','related','analog','popular');
         if ( in_array( $sType,$aTypes ) ){
             $this->sType = $sType;
         } else {
@@ -64,7 +63,7 @@ class SotmarketProduct {
 
         //если ищем популярные товары
         $bIsPopular = false;
-        if (!$sProductName && !$aProductsIds && $this->sType == 'products'){
+        if (( !$sProductName && !$aProductsIds && $this->sType == 'products' ) || $this->sType == 'popular'){
             if (!$aCategories){
                 $aCategories = array(11,25);
             }
@@ -72,9 +71,9 @@ class SotmarketProduct {
             $aProductsIds = $this->oController->product_search( '' , $aCategories,array(),'popularity','asc' );
         }
 
-        if ( $sProductName && !$aProductsIds){
+        if ( $sProductName && !$aProductsIds && $this->sType != 'popular'){
 
-            if ( $this->sType == 'products'){
+            if ( $this->sType == 'products' ){
                 if (!$aCategories){
                     $aCategories = array(11,25);
                 }
@@ -148,6 +147,20 @@ class SotmarketProduct {
 
         $aProductsInfo = $this->oController->product_info_array_cached($aProductsIds, $aParams, true);
 
+        if ($this->sType == 'popular' && $sProductName){
+            //убираем товары не содержащие названия бренда
+            $aTmpProductsInfo = array();
+            foreach($aProductsInfo as $iProductId => $aProductInfoItem){
+                if (strpos($aProductInfoItem['name'],$sProductName) !== false){
+                    $aTmpProductsInfo[$iProductId] = $aProductInfoItem;
+                }
+            }
+            if (!$aTmpProductsInfo){
+                return 'Не найдено товаров по данным критериям';
+            }
+            array_splice($aTmpProductsInfo, $iCnt );
+            $aProductsInfo = $aTmpProductsInfo;
+        }
 
         $aProducts = array();
 

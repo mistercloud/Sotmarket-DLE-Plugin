@@ -4,6 +4,18 @@
 	<script type="text/javascript" src="jquery-1.7.2.min.js"></script>
 	<script type="text/javascript">
 		$(document).ready(function(){
+			$('#sotmarket-type').change( function(){
+
+				if ($(this).val() == 'popular'){
+					$('#label_product_name').html('<strong>Название бренда:</strong>');
+					$('#product_id_p').hide();
+
+				}else {
+					$('#label_product_name').html('<strong>Название товара:</strong>');
+					$('#product_id_p').show();
+				}
+			});
+		
 			$('#gen_btn').click(function(){
 				var code = '';
 				code += '{include file="engine/modules/sotmarket/sotmarket.php?';
@@ -56,15 +68,16 @@
           <option value="products" selected>Товары</option>
           <option value="related">Аксессуары</option>
           <option value="analog">Похожие товары</option>
+		  <option value="popular">Популярные товары</option>
     </select>
     </p>
-    <p>
+    <p id="product_id_p">
         <label><strong>ID товара</strong> <span class="desc2">(товаров через запятую):</span></label>
     <div class="desc">Вводим ID товаров, приоритет всегда выше в тегах, где указан ID продукта</div>
         <input type="text" id="sotmarket-product-id" value="" />
     </p>
     <p>
-        <label><strong>Название товара:</strong></label>
+        <label id="label_product_name"><strong>Название товара:</strong></label>
         <div class="desc">Пишем название товара или бренда, если указаны ID, то данное значение не сработает, так как ID более приоритетнее</div>
         <input type="text" id="sotmarket-product-name" value="" />
     </p>
